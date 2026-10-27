@@ -1,0 +1,481 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SPIDER-MAN: WEB OF CHAOS</title>
+<link rel="icon" href="images/logo.png">
+<style>
+  :root{--red:#e8112d;--blue:#0a2a8a;--dark:#06060f;--yellow:#ffd60a;--cyan:#00e5ff;--pink:#ff2fb3}
+  *{box-sizing:border-box;margin:0;padding:0}
+  html.lenis,html.lenis body{height:auto}
+  .lenis.lenis-smooth{scroll-behavior:auto!important}
+  body{background:var(--dark);color:#fff;font-family:"Impact","Arial Black",sans-serif;overflow-x:clip}
+  a{color:inherit;text-decoration:none}
+  .line{display:block;overflow:hidden;padding:.08em .12em .16em;margin:-.08em -.12em -.16em}
+  .line>span{display:inline-block}
+  .eyebrow{display:block;letter-spacing:6px;color:var(--yellow);font-size:14px;margin-bottom:18px}
+  .display{font-size:clamp(44px,7vw,118px);line-height:.92;letter-spacing:2px;text-shadow:5px 5px 0 #0007}
+  .lead{font-family:Arial,sans-serif;line-height:1.6;opacity:.88;margin:22px 0;max-width:430px}
+  .chips{display:flex;gap:10px;flex-wrap:wrap;list-style:none}
+  .chips li{border:1.5px solid #fff9;border-radius:99px;padding:8px 16px;font:700 12px Arial,sans-serif;letter-spacing:1.5px;background:#0003}
+
+  /* loader + progress */
+  .loader{position:fixed;inset:0;z-index:200;background:#0a0004;display:grid;place-items:center;text-align:center;transition:opacity .7s,visibility .7s}
+  .loader.gone{opacity:0;visibility:hidden}
+  .loader img{width:clamp(90px,16vw,170px);animation:lpulse 1.1s ease-in-out infinite alternate;filter:drop-shadow(0 0 24px #e8112d)}
+  @keyframes lpulse{from{transform:scale(.9)}to{transform:scale(1.08)}}
+  .loader i{display:block;font-style:normal;margin-top:18px;letter-spacing:6px;color:var(--yellow);font-size:14px}
+  .loader .bar{width:min(70vw,360px);height:4px;background:#fff2;margin:16px auto 0}
+  .loader .bar span{display:block;height:100%;width:0;background:var(--red);box-shadow:0 0 14px var(--red)}
+  #pbar{position:fixed;top:0;left:0;right:0;height:5px;z-index:60;background:linear-gradient(90deg,var(--red),var(--yellow),var(--cyan));transform:scaleX(0);transform-origin:0 50%}
+
+  nav{position:fixed;top:0;left:0;right:0;z-index:50;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:20px 5%;letter-spacing:2px;transition:background .4s,backdrop-filter .4s}
+  nav.scrolled{background:#06060fcc;backdrop-filter:blur(10px)}
+  nav .brand{display:flex;align-items:center;gap:10px;font-size:20px;white-space:nowrap}
+  nav .brand img{height:34px;width:auto}
+  nav .links a{margin:0 16px;font-size:13px;position:relative;font-family:Arial,sans-serif;font-weight:700;letter-spacing:1.5px}
+  nav .links a::after{content:"";position:absolute;left:0;right:0;bottom:-6px;height:2px;background:#fff;transform:scaleX(0);transition:.3s}
+  nav .links a:hover::after{transform:scaleX(1)}
+  nav .right{justify-self:end;display:flex;align-items:center;gap:16px}
+  .pill{display:inline-flex;align-items:center;gap:10px;padding:12px 28px;border-radius:99px;background:#fff;color:#b3101f;font-family:Arial,sans-serif;font-weight:800;font-size:13px;letter-spacing:1.5px;box-shadow:0 10px 30px #0005;transition:box-shadow .3s,background .3s;will-change:transform}
+  .pill:hover{box-shadow:0 14px 40px #000a;background:var(--yellow)}
+  .pill.sm{padding:8px 20px;font-size:12px}
+  .ico{width:22px;height:22px;stroke:#fff;fill:none;stroke-width:2}
+
+  /* ===== journey: hero + 3 panels; ONE fixed Spider-Man flips & moves as you scroll ===== */
+  #journey{position:relative;background:linear-gradient(#5f0812 0 100vh,#4a0a1a 170vh,#3a0a2e 300vh,#14083a)}
+  #hero{--mx:50%;--my:40%;position:relative;min-height:100vh;overflow:hidden;display:grid;grid-template-columns:minmax(260px,1fr) 1.3fr minmax(260px,1fr);align-items:center;gap:2vw;padding:120px 5% 70px;
+    background:radial-gradient(ellipse at 50% 45%,#d42b38 0,#a3121f 48%,#5f0812 100%)}
+  #hero::before{content:"";position:absolute;inset:0;background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .9 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");opacity:.42;mix-blend-mode:overlay;pointer-events:none;z-index:1}
+  #hero::after{content:"";position:absolute;inset:0;background:radial-gradient(circle 420px at var(--mx) var(--my),#ffffff30,#0000 70%);pointer-events:none;z-index:1}
+  #hero>*{position:relative;z-index:2}
+  #hero>.hero-rule,#hero>.scrollcue{position:absolute}
+  #hero>.hc{z-index:1}#hero>.hl,#hero>.hr{z-index:3}
+  .hero-rule{top:84px;left:5%;right:5%;height:1px;background:#fff5}
+  .hl .mv{font-family:Arial,sans-serif;font-weight:900;font-size:12px;letter-spacing:4px;background:#fff;color:#b3101f;display:inline-block;padding:3px 10px;margin-bottom:12px}
+  .glitch{font-size:clamp(40px,4.6vw,84px);white-space:nowrap;line-height:.95;letter-spacing:2px;position:relative;color:#fff;text-shadow:4px 4px 0 #0007;animation:shake 4s infinite}
+  .glitch::before,.glitch::after{content:attr(data-t);position:absolute;left:0;top:0;white-space:nowrap;overflow:hidden}
+  .glitch::before{color:var(--cyan);animation:gl1 1.6s infinite steps(1);clip-path:inset(0 0 60% 0);mix-blend-mode:screen}
+  .glitch::after{color:var(--pink);animation:gl2 1.3s infinite steps(1);clip-path:inset(55% 0 0 0);mix-blend-mode:screen}
+  @keyframes gl1{0%{transform:translate(-4px,0)}20%{transform:translate(4px,-2px)}40%{transform:translate(-2px,3px)}60%{transform:translate(5px,0)}80%{transform:translate(-5px,2px)}100%{transform:translate(0)}}
+  @keyframes gl2{0%{transform:translate(4px,0)}25%{transform:translate(-5px,2px)}50%{transform:translate(3px,-3px)}75%{transform:translate(-4px,0)}100%{transform:translate(0)}}
+  @keyframes shake{0%,92%,100%{transform:none}94%{transform:translate(3px,-2px) skew(2deg)}96%{transform:translate(-4px,2px) skew(-2deg)}98%{transform:translate(2px,2px)}}
+  .hl em{display:block;font-family:"Brush Script MT","Segoe Script",cursive;font-style:italic;font-size:clamp(22px,2.6vw,40px);color:#ffd9de;margin:6px 0 18px}
+  .hl p.d{font-family:Arial,sans-serif;font-size:15px;line-height:1.6;max-width:340px;color:#ffe9ec;margin-bottom:30px}
+  .socials{display:flex;gap:18px;margin-top:44px}
+  .socials a{width:38px;height:38px;border:1.5px solid #fff9;border-radius:50%;display:grid;place-items:center;transition:.3s}
+  .socials a:hover{background:#fff;transform:translateY(-4px)}
+  .socials a:hover svg{stroke:#b3101f}
+  .socials svg{width:16px;height:16px;stroke:#fff;fill:none;stroke-width:2}
+  .hc{position:relative;display:grid;place-items:center;min-height:62vh}
+  .biglogo{position:absolute;top:50%;left:50%;--lh:min(84vh,780px);height:var(--lh);aspect-ratio:1001/1328;margin:calc(var(--lh)/-2) 0 0 calc(var(--lh)*-.377);
+    filter:drop-shadow(0 0 40px #ff8a9a66);opacity:.95;will-change:transform;animation:wipe 1.9s cubic-bezier(.6,0,.2,1) 1.6s backwards}
+  @keyframes wipe{from{clip-path:inset(100% 0 0 0);opacity:0}}
+  .hr h4{font-size:18px;letter-spacing:2px;display:inline-block;border-bottom:2px solid #fff;padding-bottom:4px;margin-bottom:24px}
+  .rate{display:flex;align-items:center;gap:18px;margin-bottom:22px;font-family:Arial,sans-serif}
+  .ring{position:relative;width:78px;height:78px;flex:0 0 auto}
+  .ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+  .ring circle{fill:none;stroke-width:3.5}
+  .ring .bg{stroke:#fff4}
+  .ring .fg{stroke:#fff;stroke-linecap:round;stroke-dasharray:0 100;transition:stroke-dasharray 2s cubic-bezier(.2,.9,.2,1) 2.2s}
+  .loaded .ring .fg{stroke-dasharray:var(--v) 100}
+  .ring b{position:absolute;inset:0;display:grid;place-items:center;font-family:Impact,sans-serif;font-size:22px;letter-spacing:1px}
+  .rate strong{display:block;font-size:15px}.rate span{font-size:12px;opacity:.85}
+  .trailer{position:relative;display:block;margin-top:34px;width:100%;max-width:300px;aspect-ratio:16/9;border-radius:6px;overflow:hidden;box-shadow:0 20px 50px #0008;transition:transform .4s}
+  .trailer img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .6s}
+  .trailer:hover img{transform:scale(1.12)}
+  .trailer .play{position:absolute;left:50%;top:50%;width:54px;height:54px;margin:-27px;border-radius:50%;background:#fff;display:grid;place-items:center;animation:ping 2s infinite}
+  .trailer .play svg{width:20px;height:20px;fill:#b3101f;margin-left:3px}
+  @keyframes ping{0%{box-shadow:0 0 0 0 #fff8}100%{box-shadow:0 0 0 22px #fff0}}
+  .hl>*,.hr>*{animation:rise .9s cubic-bezier(.2,.9,.2,1) backwards;animation-delay:calc(1.7s + var(--i,0)*.12s)}
+  @keyframes rise{from{opacity:0;transform:translateY(28px)}}
+  .scrollcue{bottom:22px;left:50%;transform:translateX(-50%);z-index:3;font-family:Arial,sans-serif;font-size:11px;letter-spacing:4px;opacity:.85;display:flex;flex-direction:column;align-items:center;gap:8px}
+  .scrollcue::after{content:"";width:1px;height:34px;background:linear-gradient(#fff,#0000);animation:hint 2s infinite;transform-origin:top}
+  @keyframes hint{0%{transform:scaleY(0)}50%{transform:scaleY(1)}100%{transform:scaleY(1);opacity:0}}
+  .marquee{background:var(--red);overflow:hidden;white-space:nowrap;padding:10px 0;font-size:22px;letter-spacing:3px;border-block:4px solid #000;transform:rotate(-1.2deg);margin:-14px -20px 0;position:relative;z-index:5}
+  .marquee span{display:inline-block;animation:mq 22s linear infinite}
+  @keyframes mq{to{transform:translateX(-50%)}}
+
+  /* the fixed actor */
+  #actor{position:fixed;left:50%;top:50%;z-index:2;width:min(44vw,540px);aspect-ratio:1/1.1;pointer-events:none;will-change:transform}
+  #actor::before{content:'';position:absolute;inset:-20%;background:radial-gradient(circle at 50% 52%,#ff3b5c66 0,#ff3b5c22 40%,#0000 66%);pointer-events:none}
+  #actor .par{width:100%;height:100%;perspective:1100px;will-change:transform}
+  #actor .flip{position:relative;width:100%;height:100%;transform-style:preserve-3d;animation:charin 1.4s cubic-bezier(.2,.9,.2,1) 1.6s backwards}
+  @keyframes charin{from{opacity:0;scale:.8;translate:0 60px}}
+  #actor .layer{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 40px 40px #0009);opacity:0}
+  #actor .layer:first-child{opacity:1}
+
+  .panel{position:relative;min-height:118vh;display:flex;align-items:center;padding:0 7%}
+  .panel.left{justify-content:flex-start}.panel.right{justify-content:flex-end}
+  .panel .in{max-width:min(520px,44vw);position:relative;z-index:3}
+  .panel.center{flex-direction:column;justify-content:space-between;align-items:center;text-align:center;padding:16vh 7% 12vh}
+  .panel.center .in{max-width:760px}
+  .panel.center .lead{margin-inline:auto}
+  .bgword{position:absolute;left:0;top:50%;transform:translateY(-50%);white-space:nowrap;font-size:clamp(180px,30vw,520px);line-height:1;color:transparent;-webkit-text-stroke:2px #ffffff14;pointer-events:none;user-select:none}
+  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;width:min(900px,100%);position:relative;z-index:3;list-style:none;text-align:center}
+  .stats li{border:4px solid #fff;padding:22px 10px;background:#0006;box-shadow:8px 8px 0 var(--red)}
+  .stats b{display:block;font-size:clamp(44px,7vw,92px);color:var(--yellow);text-shadow:4px 4px 0 #000;font-weight:400}
+  .stats span{letter-spacing:3px;font-size:13px}
+  #emblem .stats{width:100%;gap:14px;margin-top:34px}#emblem .stats li{padding:16px 6px;box-shadow:6px 6px 0 var(--red)}#emblem .stats b{font-size:clamp(28px,3.4vw,52px)}
+
+  /* ===== hanging Spidey: drops on a web, swing settles ===== */
+  #hang{position:relative;height:100vh;overflow:hidden;background:linear-gradient(#070716,#2b0a4a 45%,#d0236a 78%,#ff9a3c)}
+  .stars{position:absolute;inset:0;background:radial-gradient(1.5px 1.5px at 12% 20%,#fff,#0000),radial-gradient(1.5px 1.5px at 30% 8%,#fff,#0000),radial-gradient(2px 2px at 55% 18%,#fff,#0000),radial-gradient(1.5px 1.5px at 78% 10%,#fff,#0000),radial-gradient(1.5px 1.5px at 90% 30%,#fff,#0000),radial-gradient(1.5px 1.5px at 66% 35%,#fff,#0000),radial-gradient(1.5px 1.5px at 20% 40%,#fff,#0000);animation:twinkle 3s infinite alternate}
+  @keyframes twinkle{to{opacity:.4}}
+  .moon{position:absolute;right:12%;top:14%;width:clamp(70px,9vw,130px);aspect-ratio:1;border-radius:50%;background:radial-gradient(circle at 35% 35%,#fff,#ffe9b0 60%,#f2c46d);box-shadow:0 0 80px #ffe9b088}
+  .sk{position:absolute;left:0;bottom:0;width:200%;background-repeat:repeat-x;background-size:50% 100%}
+  .sk1{height:52%;opacity:.5}.sk2{height:40%;opacity:.8}.sk3{height:28%}
+  .hang-txt{position:absolute;left:7%;top:50%;transform:translateY(-62%);z-index:3;max-width:min(480px,46vw)}
+  .pend{position:absolute;top:0;right:15%;width:clamp(170px,22vw,290px);transform-origin:53% 0;z-index:4;perspective:800px;--len:0px}
+  .pend .rope{width:3px;height:var(--len);margin-left:calc(53% - 1.5px);background:linear-gradient(#fff,#ffffffb0);box-shadow:0 0 10px #fff9}
+  .pend img{display:block;width:100%;transform-origin:53% 0;animation:idle 2.6s ease-in-out infinite alternate;filter:drop-shadow(0 30px 30px #0009)}
+  @keyframes idle{from{transform:rotate(-2.5deg)}to{transform:rotate(2.5deg)}}
+  .bubble{position:absolute;z-index:5;background:#fff;color:#000;border:4px solid #000;border-radius:50%;padding:16px 22px;font-size:26px;box-shadow:5px 5px 0 #000;opacity:0;transform:scale(0)}
+  .bubble.b1{right:34%;top:34%}.bubble.b2{right:6%;top:58%}
+
+  /* ===== horizontal reel ===== */
+  #reel{position:relative;height:100vh;overflow:hidden;display:flex;flex-direction:column;justify-content:center;background:linear-gradient(135deg,#0a0a2a,#3a0a4a 60%,#6b0d24)}
+  .reel-viewport{overflow:hidden}
+  .reel-track{display:flex;align-items:center;gap:4vw;padding:0 8vw;width:max-content;list-style:none}
+  .reel-title{font-size:clamp(70px,14vw,220px);line-height:.9;letter-spacing:3px;flex:0 0 auto;color:transparent;-webkit-text-stroke:3px #fff;text-shadow:8px 8px 0 var(--red)}
+  .rcard{position:relative;flex:0 0 auto;height:60vh;border:6px solid #fff;box-shadow:10px 10px 0 var(--pink);overflow:hidden;background:#000;transition:transform .15s,box-shadow .2s}
+  .rcard.crop{aspect-ratio:4/5}.rcard.white{background:#fff}.rcard.logo{background:linear-gradient(#e85b63,#8f1018)}
+  .rcard .im{height:100%;will-change:transform;transform:scale(1.18)}
+  .rcard.crop .im{position:absolute;inset:0;height:auto;background-image:url(images/2.jpg);background-repeat:no-repeat}
+  .rcard img{height:100%;width:auto;display:block}
+  .rcard.logo img{padding:10% 6%}
+  .rcard .rn{position:absolute;top:8px;left:12px;font-size:34px;color:#fff;-webkit-text-stroke:2px #000;text-shadow:3px 3px 0 #000;z-index:2}
+  .rcard .cap{position:absolute;left:0;right:0;bottom:0;padding:10px 14px;background:var(--yellow);color:#000;border-top:5px solid #000;font-size:19px;letter-spacing:1px;z-index:2}
+  .reel-bar{height:5px;background:#fff2;margin:5vh 8vw 0}
+  .reel-bar span{display:block;height:100%;background:var(--yellow);transform:scaleX(0);transform-origin:0 50%}
+
+  /* ===== spider-verse poster ===== */
+  #verse{padding:110px 5% 140px;background:radial-gradient(circle at 50% 0,#4b1a8a,#120626 60%,#06060f);position:relative;overflow:hidden}
+  #verse h2{font-size:clamp(34px,6vw,90px);text-align:center;letter-spacing:3px;margin-bottom:60px;text-shadow:4px 4px 0 var(--pink),-4px -4px 0 var(--cyan)}
+  .stage{display:grid;place-items:center;perspective:1200px;margin-bottom:90px}
+  .poster{position:relative;width:min(88vw,460px);aspect-ratio:1382/2048;transform-style:preserve-3d;transition:transform .12s;box-shadow:0 0 80px #ff2fb388,0 0 160px #00e5ff44}
+  .poster>div{position:absolute;inset:0;background:url(images/2.jpg) center/cover}
+  .poster .r{mix-blend-mode:screen;filter:saturate(2) hue-rotate(-40deg);opacity:.6;animation:rg 2.2s infinite steps(1)}
+  .poster .c{mix-blend-mode:screen;filter:saturate(2) hue-rotate(120deg);opacity:.5;animation:cg 1.7s infinite steps(1)}
+  @keyframes rg{0%{transform:translate(0)}15%{transform:translate(12px,-4px);clip-path:inset(10% 0 60% 0)}30%{transform:translate(-14px,3px);clip-path:inset(50% 0 20% 0)}45%{transform:translate(0);clip-path:none}70%{transform:translate(8px,6px);clip-path:inset(75% 0 5% 0)}85%{transform:translate(0);clip-path:none}}
+  @keyframes cg{0%{transform:translate(0)}20%{transform:translate(-12px,5px);clip-path:inset(30% 0 40% 0)}40%{transform:translate(10px,-5px);clip-path:inset(5% 0 80% 0)}55%{transform:translate(0);clip-path:none}80%{transform:translate(-9px,0);clip-path:inset(65% 0 10% 0)}}
+  #verse .stats{margin:auto;max-width:1000px}
+
+  /* ===== cursor ===== */
+  .cur-dot,.cur-ring,.cur-burst{display:none}
+  @media (pointer:fine){
+    html,body,a,button,.rcard{cursor:none}
+    .cur-dot,.cur-ring{display:grid;position:fixed;top:0;left:0;z-index:300;pointer-events:none;opacity:0;transition:opacity .3s}
+    .cur-on .cur-dot,.cur-on .cur-ring{opacity:1}
+    .cur-dot{width:8px;height:8px;margin:-4px;border-radius:50%;background:#fff;mix-blend-mode:difference}
+    .cur-ring{width:42px;height:42px;margin:-21px;border:1.5px solid #fff;border-radius:50%;mix-blend-mode:difference;place-items:center;font:800 10px Arial,sans-serif;letter-spacing:2px;color:#000;transition:width .3s cubic-bezier(.2,.9,.2,1),height .3s cubic-bezier(.2,.9,.2,1),margin .3s cubic-bezier(.2,.9,.2,1),background .3s,opacity .3s}
+    .cur-ring.hov{width:92px;height:92px;margin:-46px;background:#fff}
+    .cur-ring.down{width:28px;height:28px;margin:-14px}
+    .cur-burst{display:block;position:fixed;z-index:298;pointer-events:none;width:160px;height:160px;margin:-80px;animation:burst .7s ease-out forwards}
+    @keyframes burst{from{transform:scale(.2) rotate(-20deg);opacity:1}to{transform:scale(1.2) rotate(10deg);opacity:0}}
+  }
+  .pow{position:fixed;z-index:99;pointer-events:none;font-size:64px;color:var(--yellow);-webkit-text-stroke:3px #000;text-shadow:5px 5px 0 var(--red);animation:pow .7s ease-out forwards}
+  @keyframes pow{0%{transform:translate(-50%,-50%) scale(.2) rotate(-20deg);opacity:1}60%{transform:translate(-50%,-50%) scale(1.5) rotate(8deg);opacity:1}100%{transform:translate(-50%,-90%) scale(1.8) rotate(12deg);opacity:0}}
+  .shake{animation:bodyshake .35s}
+  @keyframes bodyshake{25%{transform:translate(-8px,6px)}50%{transform:translate(8px,-6px)}75%{transform:translate(-5px,-4px)}}
+
+  footer{text-align:center;padding:60px 20px;background:#000;letter-spacing:4px}
+  footer img{height:70px;margin-bottom:14px}
+  footer b{display:block;color:var(--red);font-size:28px;font-weight:400}
+  footer p{margin-top:12px;font-size:12px;opacity:.6;font-family:Arial,sans-serif;letter-spacing:1px}
+
+  @media(max-width:820px){
+    #hero{grid-template-columns:1fr;text-align:center;padding-top:110px;gap:30px}.hc{order:-1;min-height:46vh}.biglogo{--lh:52vh}
+    .hl p.d{margin-inline:auto}.socials,.rate{justify-content:center}.hr{justify-self:center}.trailer{margin-inline:auto}nav .links{display:none}nav{grid-template-columns:1fr auto}
+    #actor{width:min(78vw,380px)}
+    .panel,.panel.left,.panel.right{justify-content:flex-end;align-items:flex-end;padding:0 7% 8vh}.panel .in{max-width:100%;background:linear-gradient(#0000,#14061fdd 30%);padding:60px 0 0}
+    .stats{grid-template-columns:1fr}
+    .hang-txt{top:auto;bottom:6%;transform:none;max-width:86vw}.pend{right:6%}.bubble.b2{display:none}
+    #reel{height:auto;padding:80px 0}.reel-viewport{overflow-x:auto;scrollbar-width:none}.reel-bar{display:none}.rcard{height:54vh}
+  }
+</style>
+</head>
+<body>
+<div class="cur-dot" id="curdot"></div><div class="cur-ring" id="curring"></div>
+
+<div class="loader" id="loader"><div><img src="images/logo.png" alt=""><i>LOADING THE VERSE <span id="lpct">0</span>%</i><div class="bar"><span id="lbar"></span></div></div></div>
+<div id="pbar"></div>
+
+<nav id="nav"><a class="brand" href="#hero"><img src="images/logo.png" alt=""><b>SPIDER-MAN</b></a>
+  <div class="links"><a href="#hero">HOME</a><a href="#swing">SWING</a><a href="#hang">HANG</a><a href="#reel">REEL</a><a href="#verse">VERSE</a></div>
+  <div class="right"><a class="pill sm mag" href="#reel" data-cursor="GO">JOIN THE VERSE</a>
+    <svg class="ico" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg></div></nav>
+
+<!-- the one fixed Spider-Man (cut out), moved & flipped by scroll -->
+<div id="actor" aria-hidden="true"><div class="par"><div class="flip">
+  <img class="layer" src="images/cut-swing.png" alt="">
+  <img class="layer" src="images/cut-miles.png" alt="">
+  <img class="layer" src="images/logo.png" alt="">
+</div></div></div>
+
+<div id="journey">
+<!-- 1 HERO -->
+<section id="hero" class="stop">
+  <div class="hero-rule"></div>
+  <div class="hl">
+    <span class="mv" style="--i:0">MARVEL</span>
+    <h1 class="glitch" data-t="SPIDER-MAN" style="--i:1">SPIDER-MAN</h1>
+    <em style="--i:2">Web of Chaos</em>
+    <p class="d" style="--i:3">Swing through the city, hang upside down and cross the multiverse. Anyone can wear the mask — scroll to see how.</p>
+    <a class="pill mag" href="#swing" data-cursor="GO" style="--i:4">ENTER THE VERSE <span>→</span></a>
+    <div class="socials" style="--i:5">
+      <a href="#" aria-label="Facebook"><svg viewBox="0 0 24 24"><path d="M14 8h3V4h-3a4 4 0 0 0-4 4v3H7v4h3v6h4v-6h3l1-4h-4V8z"/></svg></a>
+      <a href="#" aria-label="Instagram"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r=".6"/></svg></a>
+      <a href="#" aria-label="X"><svg viewBox="0 0 24 24"><path d="M3 4l7.5 9.5L3.5 20H6l5.6-5 4 5H21l-8-10.3L19.8 4h-2.5l-5.2 4.6L8 4z"/></svg></a></div>
+  </div>
+  <div class="hc" id="hc"><img class="biglogo" id="biglogo" src="images/logo.png" alt=""></div>
+  <div class="hr">
+    <h4 style="--i:1">FAN REVIEWS</h4>
+    <div class="rate" style="--i:2"><div class="ring" style="--v:99"><svg viewBox="0 0 36 36"><circle class="bg" cx="18" cy="18" r="16" pathLength="100"/><circle class="fg" cx="18" cy="18" r="16" pathLength="100"/></svg><b data-score="9.9">0.0</b></div>
+      <div><strong>WEB-SLINGERS</strong><span>“Best swing in town”</span></div></div>
+    <div class="rate" style="--i:3"><div class="ring" style="--v:97"><svg viewBox="0 0 36 36"><circle class="bg" cx="18" cy="18" r="16" pathLength="100"/><circle class="fg" cx="18" cy="18" r="16" pathLength="100"/></svg><b data-score="9.7">0.0</b></div>
+      <div><strong>SPIDER-FANS</strong><span>“Peak multiverse”</span></div></div>
+    <h4 style="--i:4;margin-top:14px">WATCH TRAILER</h4>
+    <a class="trailer mag" style="--i:5" href="https://www.youtube.com/results?search_query=spider-man+beyond+the+spider-verse+trailer" target="_blank" rel="noopener" data-cursor="PLAY">
+      <img src="images/4.jpg" alt="Trailer thumbnail"><span class="play"><svg viewBox="0 0 24 24"><path d="M6 4l14 8-14 8z"/></svg></span></a>
+  </div>
+  <div class="scrollcue">SCROLL</div>
+</section>
+
+<div class="marquee"><span id="mq"></span></div>
+
+<!-- 2 SWING (actor right, turned left) -->
+<section class="panel left stop" id="swing">
+  <div class="bgword" id="bgword">SPIDEY SPIDEY SPIDEY</div>
+  <div class="in">
+    <span class="eyebrow reveal">02 — THE SWING</span>
+    <h2 class="display"><span class="line"><span>Fastest Way</span></span><span class="line"><span>Through Town</span></span></h2>
+    <p class="lead reveal">No cars, no subway — one web line, one very long drop, and the whole skyline is your playground.</p>
+    <ul class="chips reveal"><li>Web-shooters</li><li>Wall-crawl</li><li>Rooftop routes</li></ul>
+  </div>
+</section>
+
+<!-- 3 MILES (actor flips to Miles, moves left) -->
+<section class="panel right stop" id="miles">
+  <div class="in">
+    <span class="eyebrow reveal">03 — MILES MORALES</span>
+    <h2 class="display"><span class="line"><span>Anyone Can</span></span><span class="line"><span>Wear The Mask</span></span></h2>
+    <p class="lead reveal">A new Spider-Man with venom blasts, camouflage and a style that is all his own.</p>
+    <ul class="chips reveal"><li>Venom power</li><li>Camouflage</li><li>Brooklyn</li></ul>
+  </div>
+</section>
+
+<!-- 4 EMBLEM -->
+<section class="panel left stop" id="emblem">
+  <div class="in">
+    <span class="eyebrow reveal">04 — THE EMBLEM</span>
+    <h2 class="display"><span class="line"><span>Eight Legs.</span></span><span class="line"><span>One Hero.</span></span></h2>
+    <p class="lead reveal">Wherever you swing, the spider goes with you.</p>
+    <ul class="stats">
+      <li><b data-count="8">0</b><span>LEGS</span></li>
+      <li><b data-count="1">0</b><span>HERO</span></li>
+      <li><b data-count="100" data-suffix="%">0</b><span>WEB</span></li>
+    </ul>
+  </div>
+</section>
+</div>
+
+<!-- 5 HANGING SPIDEY -->
+<section id="hang">
+  <div class="stars"></div><div class="moon"></div>
+  <div class="sk sk1" id="sk1"></div><div class="sk sk2" id="sk2"></div><div class="sk sk3" id="sk3"></div>
+  <div class="hang-txt">
+    <span class="eyebrow">05 — GOTCHA</span>
+    <h2 class="display"><span class="line"><span>JUST</span></span><span class="line"><span>HANGING</span></span><span class="line"><span>AROUND</span></span></h2>
+    <p class="lead" id="hangp">Keep scrolling and he drops in on a single strand of web — then settles in for the night.</p>
+  </div>
+  <div class="pend" id="pend"><div class="rope"></div><img src="images/cut-hang.png" alt="Spider-Man hanging upside down"></div>
+  <div class="bubble b1" id="bub1">BOO!</div><div class="bubble b2" id="bub2">SPIDER-SENSE!</div>
+</section>
+
+<!-- 6 REEL -->
+<section id="reel">
+  <div class="reel-viewport"><ol class="reel-track" id="track"><li class="reel-title">THE<br>REEL →</li></ol></div>
+  <div class="reel-bar"><span id="reelfill"></span></div>
+</section>
+
+<!-- 7 VERSE -->
+<section id="verse">
+  <h2><span class="line"><span>ACROSS THE SPIDER-VERSE</span></span></h2>
+  <div class="stage"><div class="poster" id="poster"><div class="c"></div><div class="r"></div><div class="main"></div></div></div>
+  <ul class="stats">
+    <li><b data-count="616">0</b><span>EARTH OF PETER PARKER</span></li>
+    <li><b data-count="1610">0</b><span>EARTH OF MILES MORALES</span></li>
+    <li><b data-count="2099">0</b><span>YEAR OF MIGUEL O'HARA</span></li>
+  </ul>
+</section>
+
+<footer><img src="images/logo.png" alt=""><b>WITH GREAT POWER…</b><p>Fan-made tribute page. Spider-Man © Marvel.</p></footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+<script>
+const $=id=>document.getElementById(id);
+function pow(x,y,t){const d=document.createElement('div');d.className='pow';d.textContent=t;d.style.left=x+'px';d.style.top=y+'px';document.body.appendChild(d);setTimeout(()=>d.remove(),700)}
+function bang(){document.body.classList.add('shake');setTimeout(()=>document.body.classList.remove('shake'),350)}
+const lerp=(a,b,t)=>a+(b-a)*t, ease=t=>t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
+
+/* ---------- loader ---------- */
+(function(){let p=0;const L=$('loader'),n=$('lpct'),b=$('lbar');
+  const iv=setInterval(()=>{p=Math.min(100,p+Math.random()*9+3);n.textContent=Math.floor(p);b.style.width=p+'%';
+    if(p>=100){clearInterval(iv);setTimeout(()=>L.classList.add('gone'),250)}},60);
+  setTimeout(()=>L.classList.add('gone'),4000)})();
+$('mq').textContent='✦ WITH GREAT POWER COMES GREAT RESPONSIBILITY ✦ THWIP ✦ SPIDER-VERSE ✦ ANYONE CAN WEAR THE MASK '.repeat(8);
+
+/* ---------- hero: spotlight, parallax, scores ---------- */
+const hero=$('hero'),actor=$('actor'),par=actor.querySelector('.par'),flip=actor.querySelector('.flip'),layers=[...actor.querySelectorAll('.layer')],biglogo=$('biglogo');
+const mouse={tx:0,ty:0,x:0,y:0};
+hero.addEventListener('mousemove',e=>{const r=hero.getBoundingClientRect();
+  hero.style.setProperty('--mx',(e.clientX-r.left)+'px');hero.style.setProperty('--my',(e.clientY-r.top)+'px')});
+addEventListener('mousemove',e=>{mouse.tx=e.clientX/innerWidth-.5;mouse.ty=e.clientY/innerHeight-.5});
+setTimeout(()=>{document.body.classList.add('loaded');
+  document.querySelectorAll('[data-score]').forEach(b=>{const end=+b.dataset.score,t0=performance.now();
+    (function f(t){const k=Math.min(1,Math.max(0,(t-t0)/2000)),e=1-Math.pow(1-k,3);b.textContent=(end*e).toFixed(1);if(k<1)requestAnimationFrame(f)})(t0)})},2200);
+addEventListener('scroll',()=>$('nav').classList.toggle('scrolled',scrollY>60),{passive:true});
+
+/* ---------- custom cursor ---------- */
+if(matchMedia('(pointer:fine)').matches){
+  const dot=$('curdot'),ring=$('curring');let cx_=-100,cy_=-100,rx=-100,ry=-100;
+  addEventListener('mousemove',e=>{cx_=e.clientX;cy_=e.clientY;document.body.classList.add('cur-on')});
+  document.addEventListener('mouseleave',()=>document.body.classList.remove('cur-on'));
+  document.addEventListener('mouseover',e=>{const t=e.target.closest('a,button,.rcard,[data-cursor]');
+    if(t){ring.classList.add('hov');ring.textContent=t.dataset.cursor||(t.classList.contains('rcard')?'VIEW':'GO')}else{ring.classList.remove('hov');ring.textContent=''}});
+  addEventListener('mousedown',()=>ring.classList.add('down'));addEventListener('mouseup',()=>ring.classList.remove('down'));
+  addEventListener('click',e=>{const b=document.createElement('div');b.className='cur-burst';b.style.left=e.clientX+'px';b.style.top=e.clientY+'px';
+    let l='';for(let i=0;i<12;i++){const a=i*Math.PI/6;l+=`<line x1="80" y1="80" x2="${80+Math.cos(a)*76}" y2="${80+Math.sin(a)*76}"/>`}
+    for(let k=1;k<=3;k++){let d='';for(let i=0;i<=12;i++){const a=i*Math.PI/6,r=k*24;d+=(i?'L':'M')+(80+Math.cos(a)*r)+','+(80+Math.sin(a)*r)}l+=`<path d="${d}Z"/>`}
+    b.innerHTML=`<svg viewBox="0 0 160 160" fill="none" stroke="#fff" stroke-width="1.6">${l}</svg>`;document.body.appendChild(b);setTimeout(()=>b.remove(),700)});
+  document.querySelectorAll('.mag').forEach(m=>{
+    m.addEventListener('mousemove',e=>{const r=m.getBoundingClientRect();m.style.transform=`translate(${(e.clientX-r.left-r.width/2)*.28}px,${(e.clientY-r.top-r.height/2)*.4}px)`});
+    m.addEventListener('mouseleave',()=>m.style.transform='')});
+  (function loop(){rx+=(cx_-rx)*.16;ry+=(cy_-ry)*.16;dot.style.transform=`translate(${cx_}px,${cy_}px)`;ring.style.transform=`translate(${rx}px,${ry}px)`;requestAnimationFrame(loop)})();
+}
+
+/* ---------- poster tilt ---------- */
+const poster=$('poster');
+poster.parentElement.addEventListener('mousemove',e=>{const r=poster.getBoundingClientRect(),x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;poster.style.transform=`rotateY(${x*30}deg) rotateX(${-y*30}deg)`});
+poster.parentElement.addEventListener('mouseleave',()=>poster.style.transform='');
+poster.addEventListener('click',e=>{pow(e.clientX,e.clientY,'KAPOW!');bang()});
+
+/* ---------- reel cards — ADD MORE PHOTOS HERE ----------
+   {src:'images/6.jpg', n:'NAME'}                → a full photo   (add white:true for a white background, logo:true for the emblem card)
+   {n:'NAME', x:25, y:16, w:38}                  → a crop of the poster (x,y,w are % of images/2.jpg) */
+const REEL=[
+  {src:'images/1.jpg',n:'THE SWING'},
+  {n:'MILES MORALES',x:25,y:16,w:38},
+  {src:'images/5.jpg',n:'MILES — PS5'},
+  {n:'GWEN STACY',x:6,y:36,w:32},
+  {src:'images/logo.png',n:'THE EMBLEM',logo:true},
+  {src:'images/4.jpg',n:'BEYOND THE VERSE'},
+  {n:'SPIDER-MAN 2099',x:50,y:2,w:34},
+  {src:'images/3.jpg',n:'HANG TIME',white:true},
+  {src:'images/2.jpg',n:'ACROSS THE VERSE'},
+  {n:'THE SPIDER',x:36,y:54,w:30},
+  {n:'PETER B. & MAYDAY',x:70,y:18,w:28},
+  {n:'SPIDER-WOMAN',x:76,y:54,w:24}];
+const track=$('track');
+REEL.forEach((it,i)=>{
+  const li=document.createElement('li');li.className='rcard'+(it.src?'':' crop')+(it.white?' white':'')+(it.logo?' logo':'');
+  if(it.src){li.innerHTML=`<div class="im"><img src="${it.src}" alt="${it.n}"></div>`}
+  else{const h=it.w*1382/(2048*.8);li.innerHTML=`<div class="im"></div>`;const im=li.firstChild;
+    im.style.backgroundSize=`${10000/it.w}% auto`;im.style.backgroundPosition=`${it.x/(100-it.w)*100}% ${it.y/(100-h)*100}%`}
+  li.insertAdjacentHTML('beforeend',`<span class="rn">${String(i+1).padStart(2,'0')}</span><div class="cap">${it.n}</div>`);
+  li.addEventListener('mousemove',e=>{const r=li.getBoundingClientRect(),px=(e.clientX-r.left)/r.width-.5,py=(e.clientY-r.top)/r.height-.5;
+    li.style.transform=`perspective(800px) rotateY(${px*22}deg) rotateX(${-py*22}deg) scale(1.05)`;li.style.boxShadow=`${-px*30}px ${-py*30}px 0 #ff2fb3`});
+  li.addEventListener('mouseleave',()=>{li.style.transform='';li.style.boxShadow=''});
+  li.addEventListener('click',e=>{pow(e.clientX,e.clientY,['POW!','BAM!','THWIP!','ZAP!'][i%4]);bang()});
+  track.appendChild(li)});
+
+/* ---------- skyline art for the hang section ---------- */
+function skyline(color,seed,windows){let s='',x=0,r=seed;const rnd=()=>(r=(r*9301+49297)%233280)/233280;
+  while(x<1000){const w=40+rnd()*70,h=60+rnd()*260;s+=`<rect x="${x}" y="${400-h}" width="${w}" height="${h}" fill="${color}"/>`;
+    if(windows)for(let wy=400-h+12;wy<390;wy+=18)for(let wx=x+8;wx<x+w-10;wx+=14)if(rnd()>.55)s+=`<rect x="${wx}" y="${wy}" width="6" height="9" fill="#ffd60a" opacity=".85"/>`;x+=w+rnd()*10}
+  return `url("data:image/svg+xml,${encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1000 400' preserveAspectRatio='none'>${s}</svg>`)}")`}
+$('sk1').style.backgroundImage=skyline('#3b1058',7,false);$('sk2').style.backgroundImage=skyline('#220a3a',21,true);$('sk3').style.backgroundImage=skyline('#0a0414',42,true);
+
+/* ============ the jacket-style actor: one fixed Spider-Man, moved & flipped per section ============ */
+function initActor(){
+  const mob=()=>innerWidth<=820;
+  const POSES=()=>{const W=innerWidth,H=innerHeight,m=mob();return[
+    {x:0,y:m?110+H*.23-H*.5:H*.03,s:m?.8:1,ry:0,rz:0,img:0},
+    {x:m?0:W*.25,y:m?-H*.12:0,s:m?.78:1.05,ry:-24,rz:-5,img:0},
+    {x:m?0:-W*.25,y:m?-H*.12:0,s:m?1:1.32,ry:24,rz:5,img:1},
+    {x:m?0:W*.25,y:m?-H*.12:0,s:m?.78:1.02,ry:-18,rz:0,img:2}]};
+  const stops=[...document.querySelectorAll('.stop')];
+  const cur={x:0,y:0,s:1,ry:0,rz:0},tgt={...cur};let img=0,ex=0,first=true;
+  const prog=i=>{const r=stops[i+1].getBoundingClientRect();return Math.min(1,Math.max(0,1-r.top/innerHeight))};
+  function compute(){const P=POSES();Object.assign(tgt,P[0]);img=P[0].img;ex=0;
+    for(let i=0;i<P.length-1;i++){const p=prog(i);if(p<=0)continue;const a=P[i],b=P[i+1],e=ease(p);
+      for(const k of['x','y','s','ry','rz'])tgt[k]=lerp(a[k],b[k],e);
+      if(a.img!==b.img){img=p<.5?a.img:b.img;ex=p<.5?p*180:(p-1)*180}else{img=b.img;ex=0}}}
+  (function tick(){compute();
+    const f=first?1:.12;first=false;for(const k of Object.keys(cur))cur[k]=lerp(cur[k],tgt[k],f);
+    mouse.x+=(mouse.tx-mouse.x)*.07;mouse.y+=(mouse.ty-mouse.y)*.07;
+    actor.style.transform=`translate3d(${cur.x}px,${cur.y}px,0) translate(-50%,-50%) scale(${cur.s}) rotate(${cur.rz}deg)`;
+    par.style.transform=`translate(${mouse.x*18}px,${mouse.y*12}px) rotateX(${-mouse.y*8}deg)`;
+    flip.style.transform=`rotateY(${cur.ry+ex+mouse.x*10}deg)`;
+    layers.forEach((l,i)=>l.style.opacity=i===img?1:0);
+    biglogo.style.transform=`translate(${-mouse.x*40}px,${-mouse.y*26}px) rotate(${mouse.x*5}deg)`;
+    requestAnimationFrame(tick)})();
+}
+initActor();
+
+/* ============ GSAP: smooth scroll + scenes ============ */
+if(window.gsap&&window.ScrollTrigger){
+  gsap.registerPlugin(ScrollTrigger);
+  const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(!reduce&&window.Lenis){
+    const lenis=new Lenis({lerp:.085,smoothWheel:true});
+    lenis.on('scroll',ScrollTrigger.update);gsap.ticker.add(t=>lenis.raf(t*1000));gsap.ticker.lagSmoothing(0);
+    document.querySelectorAll('a[href^="#"]').forEach(a=>a.addEventListener('click',e=>{
+      const el=document.querySelector(a.getAttribute('href'));if(!el)return;e.preventDefault();lenis.scrollTo(el,{duration:1.8})}))}
+
+  gsap.to('#pbar',{scaleX:1,ease:'none',scrollTrigger:{trigger:document.body,start:'top top',end:'bottom bottom',scrub:true}});
+  gsap.to('#actor',{opacity:0,ease:'none',scrollTrigger:{trigger:'#emblem',start:'bottom 85%',end:'bottom 45%',scrub:true}});
+  gsap.to('#bgword',{xPercent:-45,ease:'none',scrollTrigger:{trigger:'#journey',start:'top top',end:'bottom bottom',scrub:true}});
+  gsap.to('#biglogo',{opacity:0,ease:'none',scrollTrigger:{trigger:'#hero',start:'60% top',end:'bottom top',scrub:true}});
+
+  document.querySelectorAll('.panel .display').forEach(h=>gsap.from(h.querySelectorAll('.line>span'),{yPercent:115,rotate:3,duration:1.2,stagger:.08,ease:'expo.out',scrollTrigger:{trigger:h,start:'top 82%',toggleActions:'play none none reverse'}}));
+  document.querySelectorAll('.panel .reveal').forEach(el=>gsap.from(el,{y:30,opacity:0,filter:'blur(8px)',duration:1.1,ease:'power3.out',scrollTrigger:{trigger:el,start:'top 88%',toggleActions:'play none none reverse'}}));
+  gsap.from('#emblem .stats li',{y:50,opacity:0,duration:1,stagger:.15,ease:'power3.out',scrollTrigger:{trigger:'#emblem .stats',start:'top 92%',toggleActions:'play none none reverse'}});
+
+  /* HANGING SPIDEY — pinned: drops on a web, swing decays, then pops a "BOO!" */
+  const pend=$('pend');
+  gsap.timeline({defaults:{ease:'none'},scrollTrigger:{trigger:'#hang',start:'top top',end:'+=260%',pin:true,scrub:1,anticipatePin:1,invalidateOnRefresh:true}})
+    .fromTo(pend,{'--len':'0px'},{'--len':()=>Math.round(innerHeight*(innerWidth<=820?.38:.46))+'px',duration:2,ease:'power2.out'},0)
+    .to(pend,{keyframes:{rotation:[-32,26,-18,11,-6,2,0],easeEach:'sine.inOut'},duration:4},0)
+    .fromTo('.hang-txt .line>span',{yPercent:115},{yPercent:0,duration:.8,stagger:.15,ease:'expo.out'},.3)
+    .fromTo('.hang-txt .lead',{opacity:0,y:24},{opacity:1,y:0,duration:.6},1.1)
+    .to('#sk1',{xPercent:-12,duration:4},0).to('#sk2',{xPercent:-22,duration:4},0).to('#sk3',{xPercent:-34,duration:4},0)
+    .to('.pend img',{rotationY:360,duration:1,ease:'power2.inOut'},3.3)
+    .to('#bub1',{opacity:1,scale:1,rotate:-8,duration:.4,ease:'back.out(3)'},3.5)
+    .to('#bub2',{opacity:1,scale:1,rotate:6,duration:.4,ease:'back.out(3)'},3.9)
+    .to({},{duration:.6},4.2);
+
+  const mm=gsap.matchMedia();
+  mm.add('(min-width: 821px)',()=>{
+    const dist=()=>Math.max(0,track.scrollWidth-innerWidth);
+    const tween=gsap.to(track,{x:()=>-dist(),ease:'none',scrollTrigger:{trigger:'#reel',start:'top top',end:()=>'+='+dist(),pin:true,scrub:1,invalidateOnRefresh:true,anticipatePin:1,onUpdate:s=>gsap.set('#reelfill',{scaleX:s.progress})}});
+    gsap.utils.toArray('.rcard .im').forEach(im=>gsap.fromTo(im,{xPercent:-7},{xPercent:7,ease:'none',scrollTrigger:{trigger:im.parentElement,containerAnimation:tween,start:'left right',end:'right left',scrub:true}}));
+    gsap.fromTo('.reel-title',{xPercent:0},{xPercent:-30,ease:'none',scrollTrigger:{trigger:'#reel',start:'top top',end:()=>'+='+dist()/2,scrub:true}});
+  });
+
+  gsap.from('#verse h2 .line>span',{yPercent:115,rotate:3,duration:1.2,ease:'expo.out',scrollTrigger:{trigger:'#verse h2',start:'top 85%',toggleActions:'play none none reverse'}});
+  gsap.from('#verse .stats li',{y:70,opacity:0,filter:'blur(8px)',duration:1,stagger:.15,ease:'power3.out',scrollTrigger:{trigger:'#verse .stats',start:'top 85%',toggleActions:'play none none reverse'}});
+  document.querySelectorAll('[data-count]').forEach(el=>{const o={v:0},end=+el.dataset.count,suf=el.dataset.suffix||'';
+    gsap.to(o,{v:end,duration:1.8,ease:'power3.out',onUpdate:()=>el.textContent=Math.round(o.v)+suf,scrollTrigger:{trigger:el,start:'top 90%'}})});
+
+  addEventListener('load',()=>ScrollTrigger.refresh());
+}else{
+  document.querySelectorAll('[data-count]').forEach(el=>el.textContent=el.dataset.count+(el.dataset.suffix||''));
+}
+</script>
+</body>
+</html>
